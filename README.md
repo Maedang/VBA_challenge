@@ -1,60 +1,104 @@
 # VBA_challenge
-Module 2 Homework 
-Background
-You are well on your way to becoming a programmer and Excel expert! In this homework assignment, you will use VBA scripting to analyze generated stock market data. Depending on your comfort level with VBA, you may choose to challenge yourself with a few of the bonus Challenge tasks.
+# VBS code: 
+Sub VBA_challenge():
 
-Before You Begin
-Create a new repository for this project called VBA-challenge. Do not add this assignment to an existing repository.
+Dim sheet As Worksheet
+#'For loop to make sure the code work for multisheets at one run
+For Each sheet In Worksheets
+'MsgBox (sheet.Name)
 
-Inside the new repository that you just created, add any VBA files that you use for this assignment. These will be the main scripts to run for each analysis.
+Dim ticker As String
+Dim total_vol As Double
+Dim row As Integer
+Dim open_price As Double
+Dim close_price As Double
 
-Files
-Download the following files to help you get started:
+'Row Titles
+sheet.Range("I1").Value = "Ticker Symbol"
+sheet.Range("J1").Value = "Yearly Change ($)"
+sheet.Range("K1").Value = "Percent Change"
+sheet.Range("L1").Value = "Total Stock Volume"
+total_vol = 0
+sheet.Range("O2").Value = "Greatest % Increase"
+sheet.Range("O3").Value = "Greatest % Decrease"
+sheet.Range("O4").Value = "Greatest Total Volume"
+sheet.Range("P1").Value = "Ticker"
+sheet.Range("Q1").Value = "Value"
 
-Module 2 Challenge files
 
-Instructions
-Create a script that loops through all the stocks for one year and outputs the following information:
+'Last_row Counts
+Dim last_row As Double
+last_row = sheet.Cells(Rows.Count, 1).End(xlUp).row
+'MsgBox (last_row)
 
-The ticker symbol
+'Loop through rows in the column
+row = 2
+For i = 2 To last_row
+If open_price = 0 Then
+open_price = sheet.Cells(i, 3).Value
+End If
 
-Yearly change from the opening price at the beginning of a given year to the closing price at the end of that year.
+'Searches for when the value of the next cell is different than that of the current cell
+If sheet.Cells(i - 1, 1) = sheet.Cells(i, 1) And sheet.Cells(i + 1, 1).Value <> sheet.Cells(i, 1).Value Then
+close_price = sheet.Cells(i, 6).Value
+price_change = close_price - open_price
+percent_change = price_change / open_price
+ticker = sheet.Cells(i, 1).Value
+total_vol = total_vol + sheet.Cells(i, 7).Value
+sheet.Cells(row, 9).Value = ticker
+sheet.Cells(row, 10).Value = Format(price_change, "0.00")
+sheet.Cells(row, 11).Value = Format(percent_change, "0.00%")
+sheet.Cells(row, 12).Value = total_vol
 
-The percentage change from the opening price at the beginning of a given year to the closing price at the end of that year.
+'Change color of the cells based on the value of the price_change
+'Green if price_change is positive
+If sheet.Cells(row, 10).Value > 0 Then
+sheet.Cells(row, 10).Interior.ColorIndex = 4
 
-The total stock volume of the stock.
+'Red if the price_change is not positive
+Else
+sheet.Cells(row, 10).Interior.ColorIndex = 3
+End If
 
-NOTE
-Make sure to use conditional formatting that will highlight positive change in green and negative change in red.
+total_vol = 0
+open_price = 0
+row = row + 1
 
-The result should match the following image:
+Else
+total_vol = total_vol + sheet.Cells(i, 7).Value
 
-Moderate solution
+End If
 
-Bonus
-Add functionality to your script to return the stock with the "Greatest % increase", "Greatest % decrease", and "Greatest total volume". The solution should match the following image:
+Next i
+Dim last_ticker As Double
+last_ticker = sheet.Cells(Rows.Count, 9).End(xlUp).row
+'MsgBox (last_ticker)
+greatest_increase = 0
+greatest_decrease = 0
+For j = 2 To last_ticker
+If sheet.Cells(j, 11).Value > greatest_increase Then
+greatest_increase = sheet.Cells(j, 11).Value
+sheet.Range("P2").Value = sheet.Cells(j, 9).Value
+sheet.Range("Q2").Value = Format(greatest_increase, "0.00%")
+End If
+Next j
+For k = 2 To last_ticker
+If sheet.Cells(k, 11) < greatest_decrease Then
+greatest_decrease = sheet.Cells(k, 11).Value
+sheet.Range("P3").Value = sheet.Cells(k, 9).Value
+sheet.Range("Q3").Value = Format(greatest_decrease, "0.00%")
+End If
+Next k
+'MsgBox (greatest_decrease)
+greatest_vol = 0
+For m = 2 To last_ticker
 
-Hard solution
-
-Make the appropriate adjustments to your VBA script to enable it to run on every worksheet (that is, every year) at once.
-
-Other Considerations
-Use the sheet alphabetical_testing.xlsx while developing your code. This dataset is smaller and will allow you to test faster. Your code should run on this file in under 3 to 5 minutes.
-
-Make sure that the script acts the same on every sheet. The joy of VBA is that it takes the tediousness out of repetitive tasks with the click of a button.
-
-Some assignments, like this one, contain a bonus. It is possible to achieve proficiency for this assignment without completing the bonus, but the bonus is an opportunity to further develop your skills and receive extra points for doing so.
-
-Submission
-To submit your Challenge assignment, click Submit, and then provide the URL of your GitHub repository for grading.
-
-NOTE
-You are allowed to miss up to two Challenge assignments and still earn your certificate. If you complete all Challenge assignments, your lowest two grades will be dropped. If you wish to skip this assignment, click Next, and proceed to the next module.
-
-Comments are disabled for graded submissions in Bootcamp Spot. If you have questions about your feedback, please notify your instructional staff or your Student Success Manager. If you would like to resubmit your work for an additional review, you can use the Resubmit Assignment button to upload new links. You may resubmit up to three times for a total of four submissions.
-
-Rubric
-Module 2 Challenge Rubric (Links to an external site.)
-
-References
-Dataset created by Trilogy Education Services, a 2U, Inc. brand.
+If sheet.Cells(m, 12) > greatest_vol Then
+greatest_vol = sheet.Cells(m, 12).Value
+sheet.Range("P4").Value = sheet.Cells(m, 9).Value
+sheet.Range("Q4").Value = greatest_vol
+End If
+Next m
+'MsgBox (greatest_vol)
+Next sheet
+End Sub
